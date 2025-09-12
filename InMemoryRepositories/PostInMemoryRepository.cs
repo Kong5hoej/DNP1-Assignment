@@ -5,8 +5,8 @@ namespace InMemoryRepositories;
 
 public class PostInMemoryRepository : IPostRepository
 {
-    private List<Post> posts;
-    public Task<Post> AddAsync(Post post)
+    private List<Post> posts =  new List<Post>();
+    public Task<Post> AddPostAsync(Post post)
     {
         post.Id = posts.Any()
             ? posts.Max(p => p.Id) + 1
@@ -15,7 +15,7 @@ public class PostInMemoryRepository : IPostRepository
         return Task.FromResult(post);
     }
     
-    public Task UpdateAsync(Post post)
+    public Task UpdatePostAsync(Post post)
     {
         Post? existingPost = posts.SingleOrDefault(p => p.Id == post.Id);
         if (existingPost is null)
@@ -30,7 +30,7 @@ public class PostInMemoryRepository : IPostRepository
         return Task.CompletedTask;
     }
     
-    public Task DeleteAsync(int id)
+    public Task DeletePostAsync(int id)
     {
         Post? postToRemove = posts.SingleOrDefault(p => p.Id == id);
         if (postToRemove is null)
@@ -43,7 +43,7 @@ public class PostInMemoryRepository : IPostRepository
         return Task.CompletedTask;
     }
     
-    public Task<Post> GetSingleAsync(int id)
+    public Task<Post> GetSinglePostAsync(int id)
     {
         Post? post = posts.SingleOrDefault(p => p.Id == id);
         if (post is null)
@@ -54,7 +54,7 @@ public class PostInMemoryRepository : IPostRepository
         return Task.FromResult(post);
     }
     
-    public IQueryable<Post> GetMany()
+    public IQueryable<Post> GetManyPosts()
     {
         return posts.AsQueryable();
     }
