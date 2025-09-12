@@ -16,9 +16,11 @@ public class ManagePostsView(IPostRepository postRepository)
         Console.WriteLine("Post updated");
     }
 
-    public async Task DeletePostAsync(Post post)
+    public async Task DeletePostAsync(Post post, int userId)
     {
         Console.WriteLine("Deleting Post...");
+        if (post.UserId != userId)
+            throw new Exception("You can only delete your own posts!");
         await postRepository.DeletePostAsync(post.Id);
         Console.WriteLine("Post deleted");
     }
@@ -36,5 +38,10 @@ public class ManagePostsView(IPostRepository postRepository)
     public IQueryable<Post> GetAllPosts()
     {
         return listPostsView.GetAllPosts();
+    }
+    
+    public async Task<Post> FindPost(string? title, string? body)
+    {
+        return await listPostsView.FindPostAsync(title, body);
     }
 }
