@@ -1,11 +1,24 @@
-﻿using CLI.UI.ManagePosts;
+﻿using CLI.UI.ManageComments;
+using CLI.UI.ManagePosts;
 using CLI.UI.ManageUsers;
 using Entities;
 using RepositoryContracts;
 
 namespace CLI.UI;
 
-
+/*
+ * Få lavet:
+ * Implementeret klasser og CLI for comments
+ * Tjek CLI for posts
+ *
+ * Iflg requirements:
+ * View specific post with title, body and comments (mangler bare comments, se nr. 8)
+ *
+ * Tankeboks:
+ * Lav login/logout-funktionalitet, så man ikke skal angive username og password hele tiden
+ * Lav nogle metodekald i nogle metoder, så det reducerer arbejde i CliApp
+ * Skal man kunne liste alle comments fra en speciel bruger?
+ */
 
 
 public class CliApp( 
@@ -19,6 +32,7 @@ public class CliApp(
     
     private ManageUsersView manageUsersView = new ManageUsersView(userRepository);
     private ManagePostsView managePostsView = new ManagePostsView(postRepository);
+    private ManageCommentsView manageCommentsView = new ManageCommentsView(commentRepository);
 
     public async Task StartAsync()
     {
@@ -36,7 +50,12 @@ public class CliApp(
                               "\n 7. Update a post" +
                               "\n 8. List one post" +
                               "\n 9. List all posts" +
-                              "\n 10. Delete an post");
+                              "\n 10. Delete an post" +
+                              "\n Comment management:" +
+                              "\n 11. Create a comment" +
+                              "\n 12. Update a comment" +
+                              "\n 13. Delete a comment");
+            
             int choice = Convert.ToInt32(Console.ReadLine());
 
             switch (choice)
@@ -95,6 +114,11 @@ public class CliApp(
                     String? username6 = Console.ReadLine();
                     Console.WriteLine("What is your password?");
                     String? password6 = Console.ReadLine();
+                    if (await manageUsersView.FindUser(username6, password6) == null)
+                    {
+                        Console.WriteLine("The user is not in our system!");
+                        break;
+                    }
                     User user6 = await manageUsersView.FindUser(username6, password6);
                     Console.WriteLine("What is the title of your post?");
                     String? titleCreate = Console.ReadLine();
@@ -112,19 +136,28 @@ public class CliApp(
                     await managePostsView.UpdatePostAsync(post7);
                     Console.WriteLine("The post has now been updated!");
                     break;
-                case 8: //List one post
-                    Console.WriteLine("What is the title of your post?");
-                    String? titleOne = Console.ReadLine();
-                    Console.WriteLine("Write the body of your post");
-                    String? bodyOne = Console.ReadLine();
-                    Post post8 = await managePostsView.FindPost(titleOne, bodyOne);
-                    Console.WriteLine(await managePostsView.GetOnePostAsync(post8.Id));
+                case 8: //List one post - Should be with comments!!!
+                    Console.WriteLine("What is the ID of the post?");
+                    int postId = Convert.ToInt32(Console.ReadLine());
+                    Post post8 = await managePostsView.GetOnePostAsync(postId);
+                    Console.WriteLine($"{post8.Id}: {post8.Title} " +
+                                      $"\n {post8.Body} \n" +
+                                      $"\n Comments:");
+                    foreach (Comment comment8 in manageCommentsView.GetAllComments())
+                    {
+                        if (comment8.PostId == postId)
+                        {
+                            Console.WriteLine($"{comment8.Id}: {comment8.Body}");
+                        }
+                            
+                    }
+                    
+                    
                     break;
                 case 9: //List all posts
                     foreach (Post post9 in managePostsView.GetAllPosts())
                     {
-                        Console.WriteLine($"{post9.Id}: {post9.Title} " +
-                                          $"\n {post9.Body} \n");
+                        Console.WriteLine($"{post9.Id}: {post9.Title}");
                     }
                     break;
                 case 10: //Delete a post
@@ -144,7 +177,54 @@ public class CliApp(
                     }
                     catch (Exception e)
                     {
-                        Console.WriteLine("Try again!");
+                        Console.WriteLine(e);
+                    }
+                    break;
+                case 11: //Create a comment
+                    Console.WriteLine("What is your username?");
+                    String? username11 = Console.ReadLine();
+                    Console.WriteLine("What is your password?");
+                    String? password11 = Console.ReadLine();
+                    if (await manageUsersView.FindUser(username11, password11) == null)
+                    {
+                        Console.WriteLine("The user is not in our system!");
+                        break;
+                    }
+                    User user11 = await manageUsersView.FindUser(username11, password11);
+                    Console.WriteLine("What is the ID of the post?"); 
+                    int postId11 = Convert.ToInt32(Console.ReadLine());
+                    Console.WriteLine("Write the body of your comment?");
+                    String? comment11 = Console.ReadLine();
+                    await manageCommentsView.AddCommentAsync(postId11, user11.Id, comment11);
+                    Console.WriteLine("The post has been created!");
+                    break;
+                case 12: //Update a comment
+                    Console.WriteLine("What is the ID of the post?");
+                    int postId12 = Convert.ToInt32(Console.ReadLine());
+                    Console.WriteLine("Write the body of your comment?");
+                    String? commentBody12 = Console.ReadLine();
+                    Comment comment12 = await manageCommentsView.FindComment(postId12, commentBody12);
+                    await manageCommentsView.UpdateCommentAsync(comment12);
+                    Console.WriteLine("The comment has been updated!");
+                    break;
+                case 13: //Delete a comment
+                    Console.WriteLine("What is your username?");
+                    String? username13 = Console.ReadLine();
+                    Console.WriteLine("What is your password?");
+                    String? password13 = Console.ReadLine();
+                    User user13 = await manageUsersView.FindUser(username13, password13);
+                    Console.WriteLine("What is the ID of your post?");
+                    int postId13 = Convert.ToInt32(Console.ReadLine());
+                    Console.WriteLine("Write the body of your comment");
+                    String? commentBody13 = Console.ReadLine();
+                    Comment comment13 = await manageCommentsView.FindComment(postId13, commentBody13);
+                    try
+                    {
+                        await manageCommentsView.DeleteCommentAsync(comment13, user13.Id);
+                    }
+                    catch (Exception e)
+                    {
+                        Console.WriteLine(e);
                     }
                     break;
             }

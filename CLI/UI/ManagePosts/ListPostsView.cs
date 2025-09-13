@@ -10,7 +10,6 @@ public class ListPostsView(IPostRepository postRepository)
 
     public async Task<Post> GetOnePostAsync(int id)
     {
-        Console.WriteLine("Searching for a single post...");
         return await postRepository.GetSinglePostAsync(id);
     }
     
