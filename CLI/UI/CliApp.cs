@@ -6,21 +6,6 @@ using RepositoryContracts;
 
 namespace CLI.UI;
 
-/*
- * Få lavet:
- * Implementeret klasser og CLI for comments
- * Tjek CLI for posts
- *
- * Iflg requirements:
- * View specific post with title, body and comments (mangler bare comments, se nr. 8)
- *
- * Tankeboks:
- * Lav login/logout-funktionalitet, så man ikke skal angive username og password hele tiden
- * Lav nogle metodekald i nogle metoder, så det reducerer arbejde i CliApp
- * Skal man kunne liste alle comments fra en speciel bruger?
- */
-
-
 public class CliApp( 
     IUserRepository userRepository,
     ICommentRepository commentRepository,
@@ -36,6 +21,7 @@ public class CliApp(
 
     public async Task StartAsync()
     {
+        initialiseDummyData();
         while (true)
         {
             Console.WriteLine("\n What do you want to do? " +
@@ -83,8 +69,15 @@ public class CliApp(
                     Console.WriteLine("What is your password?");
                     String? password2 = Console.ReadLine();
                     User user2 = await manageUsersView.FindUser(username2, password2);
-                    await manageUsersView.UpdateUserAsync(user2);
-                    Console.WriteLine("The user has now been updated!");
+                    try
+                    {
+                        await manageUsersView.UpdateUserAsync(user2);
+                        Console.WriteLine("The user has now been updated!");
+                    }
+                    catch (Exception e)
+                    {
+                        Console.WriteLine("The user is not in our system!");
+                    }
                     break;
                 case 3:
                     Console.WriteLine("What is your username?");
@@ -92,10 +85,21 @@ public class CliApp(
                     Console.WriteLine("What is your password?");
                     String? password3 = Console.ReadLine();
                     User user3 = await manageUsersView.FindUser(username3, password3);
-                    await manageUsersView.GetOneUserAsync(user3.Id);
-                    Console.WriteLine($"The user has now been retrieved! Your username is {user3.Username} and your ID is {user3.Id}");
+                    try
+                    {
+                        await manageUsersView.GetOneUserAsync(user3.Id);
+                        Console.WriteLine($"The user has now been retrieved! Your username is {user3.Username} and your ID is {user3.Id}");
+                    }
+                    catch (Exception e)
+                    {
+                        Console.WriteLine("The user is not in our system!");
+                    }
                     break;
                 case 4:
+                    if (!manageUsersView.GetAllUsers().Any())
+                    {
+                        Console.WriteLine("There are no users in our system!");
+                    }
                     foreach (User user4 in manageUsersView.GetAllUsers())
                     {
                         Console.WriteLine($"{user4.Id}: {user4.Username}");
@@ -107,9 +111,16 @@ public class CliApp(
                     Console.WriteLine("What is your password?");
                     String? password5 = Console.ReadLine();
                     User user5 = await manageUsersView.FindUser(username5, password5);
-                    await manageUsersView.DeleteUserAsync(user5);
+                    try
+                    {
+                        await manageUsersView.DeleteUserAsync(user5);
+                    }
+                    catch (Exception e)
+                    {
+                        Console.WriteLine("The user is not in our system!");
+                    }
                     break;
-                case 6: //Create post
+                case 6: 
                     Console.WriteLine("What is your username?");
                     String? username6 = Console.ReadLine();
                     Console.WriteLine("What is your password?");
@@ -127,40 +138,51 @@ public class CliApp(
                     await managePostsView.AddPostAsync(titleCreate, bodyCreate, user6.Id);
                     Console.WriteLine("The post has been created!");
                     break;
-                case 7: //Update post
+                case 7: 
                     Console.WriteLine("What is the title of your post?");
                     String? titleUpdate = Console.ReadLine();
                     Console.WriteLine("Write the body of your post");
                     String? bodyUpdate = Console.ReadLine();
                     Post post7 = await managePostsView.FindPost(titleUpdate, bodyUpdate);
-                    await managePostsView.UpdatePostAsync(post7);
-                    Console.WriteLine("The post has now been updated!");
+                    try
+                    {
+                        await managePostsView.UpdatePostAsync(post7);
+                        Console.WriteLine("The post has now been updated!");
+                    }
+                    catch (Exception e)
+                    {
+                        Console.WriteLine("The post is not in our system!");
+                    }
                     break;
-                case 8: //List one post - Should be with comments!!!
+                case 8: 
                     Console.WriteLine("What is the ID of the post?");
                     int postId = Convert.ToInt32(Console.ReadLine());
                     Post post8 = await managePostsView.GetOnePostAsync(postId);
-                    Console.WriteLine($"{post8.Id}: {post8.Title} " +
+                    User user8 = await manageUsersView.FindUser(post8.UserId);
+                    Console.WriteLine($"{post8.Id}: {post8.Title}" +
+                                      $"\n Author: {user8.Username} " +
                                       $"\n {post8.Body} \n" +
                                       $"\n Comments:");
                     foreach (Comment comment8 in manageCommentsView.GetAllComments())
                     {
                         if (comment8.PostId == postId)
                         {
-                            Console.WriteLine($"{comment8.Id}: {comment8.Body}");
+                            User commentUser8 = await manageUsersView.FindUser(comment8.UserId);
+                            Console.WriteLine($"{comment8.Id} - {commentUser8.Username}: {comment8.Body}");
                         }
-                            
                     }
-                    
-                    
                     break;
-                case 9: //List all posts
+                case 9: 
+                    if (!managePostsView.GetAllPosts().Any())
+                    {
+                        Console.WriteLine("There are no posts in our system!");
+                    }
                     foreach (Post post9 in managePostsView.GetAllPosts())
                     {
                         Console.WriteLine($"{post9.Id}: {post9.Title}");
                     }
                     break;
-                case 10: //Delete a post
+                case 10:
                     Console.WriteLine("What is your username?");
                     String? username10 = Console.ReadLine();
                     Console.WriteLine("What is your password?");
@@ -180,7 +202,7 @@ public class CliApp(
                         Console.WriteLine(e);
                     }
                     break;
-                case 11: //Create a comment
+                case 11: 
                     Console.WriteLine("What is your username?");
                     String? username11 = Console.ReadLine();
                     Console.WriteLine("What is your password?");
@@ -193,31 +215,43 @@ public class CliApp(
                     User user11 = await manageUsersView.FindUser(username11, password11);
                     Console.WriteLine("What is the ID of the post?"); 
                     int postId11 = Convert.ToInt32(Console.ReadLine());
+                    if (await managePostsView.FindPost(postId11) == null)
+                    {
+                        Console.WriteLine("The post is not in our system!");
+                        break;
+                    }
                     Console.WriteLine("Write the body of your comment?");
                     String? comment11 = Console.ReadLine();
                     await manageCommentsView.AddCommentAsync(postId11, user11.Id, comment11);
                     Console.WriteLine("The post has been created!");
                     break;
-                case 12: //Update a comment
+                case 12: 
                     Console.WriteLine("What is the ID of the post?");
                     int postId12 = Convert.ToInt32(Console.ReadLine());
-                    Console.WriteLine("Write the body of your comment?");
-                    String? commentBody12 = Console.ReadLine();
-                    Comment comment12 = await manageCommentsView.FindComment(postId12, commentBody12);
-                    await manageCommentsView.UpdateCommentAsync(comment12);
-                    Console.WriteLine("The comment has been updated!");
+                    Console.WriteLine("Write the ID of your comment?");
+                    int commentId12 = Convert.ToInt32(Console.ReadLine());
+                    Comment comment12 = await manageCommentsView.FindComment(postId12, commentId12);
+                    try
+                    {
+                        await manageCommentsView.UpdateCommentAsync(comment12);
+                        Console.WriteLine("The comment has been updated!");
+                    }
+                    catch (Exception e)
+                    {
+                        Console.WriteLine("The comment is not in our system!");
+                    }
                     break;
-                case 13: //Delete a comment
+                case 13: 
                     Console.WriteLine("What is your username?");
                     String? username13 = Console.ReadLine();
                     Console.WriteLine("What is your password?");
                     String? password13 = Console.ReadLine();
                     User user13 = await manageUsersView.FindUser(username13, password13);
-                    Console.WriteLine("What is the ID of your post?");
+                    Console.WriteLine("What is the ID of the post?");
                     int postId13 = Convert.ToInt32(Console.ReadLine());
                     Console.WriteLine("Write the body of your comment");
-                    String? commentBody13 = Console.ReadLine();
-                    Comment comment13 = await manageCommentsView.FindComment(postId13, commentBody13);
+                    int commentId13 = Convert.ToInt32(Console.ReadLine());
+                    Comment comment13 = await manageCommentsView.FindComment(postId13, commentId13);
                     try
                     {
                         await manageCommentsView.DeleteCommentAsync(comment13, user13.Id);
@@ -229,5 +263,26 @@ public class CliApp(
                     break;
             }
         }
+    }
+
+    private void initialiseDummyData()
+    {
+        manageUsersView.AddUserAsync("Bob", "password");
+        manageUsersView.AddUserAsync("Michael", "password");
+        manageUsersView.AddUserAsync("Jan", "password");
+        manageUsersView.AddUserAsync("Erland", "password");
+        manageUsersView.AddUserAsync("Lars", "password");
+
+        managePostsView.AddPostAsync("I can program in Java", "If you need my help, I can program in Java!", 3);
+        managePostsView.AddPostAsync("I can program in C#", "If you need my help, I can program in C#!", 2);
+        managePostsView.AddPostAsync("I can program in HTML", "If you need my help, I can program in HTML!", 2);
+        managePostsView.AddPostAsync("I can use an Arduino", "If you need my help, I use an Arduino!", 4);
+        managePostsView.AddPostAsync("I can calculate big-O", "If you need my help, I can calculate big-0!", 5);
+
+        manageCommentsView.AddCommentAsync(1, 2, "Please help me, Jan!");
+        manageCommentsView.AddCommentAsync(4, 1, "Help me use an Arduino!");
+        manageCommentsView.AddCommentAsync(3, 3, "Help me program in HTML, Michael!");
+        manageCommentsView.AddCommentAsync(5, 4, "I don't understand big-O, help me!");
+        manageCommentsView.AddCommentAsync(2, 5, "Let me analyse your C# program!");
     }
 }

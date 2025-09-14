@@ -9,7 +9,6 @@ public class CreatePostView (IPostRepository postRepository)
 
     public async Task<Post> AddPostAsync(string? title, string? body, int userId)
     {
-        Console.WriteLine("Creating post...");
         Post post = new Post(title, body, userId);
         return await postRepository.AddPostAsync(post) ??  throw new Exception($"Post creation failed, try again!");
     }

@@ -10,16 +10,12 @@ public class ManageUsersView(IUserRepository userRepository)
     private readonly ListUserView listUserView = new ListUserView(userRepository);
     public async Task UpdateUserAsync(User user)
     { 
-        Console.WriteLine("Updating user...");
         await userRepository.UpdateUserAsync(user);
-        Console.WriteLine("User updated");
     }
 
     public async Task DeleteUserAsync(User user)
     {
-        Console.WriteLine("Deleting user...");
         await userRepository.DeleteUserAsync(user.Id);
-        Console.WriteLine("User deleted");
     }
 
     public async Task<User> AddUserAsync(string? username, string? password)
@@ -40,6 +36,11 @@ public class ManageUsersView(IUserRepository userRepository)
     public async Task<User> FindUser(string? username, string? password)
     {
         return await listUserView.FindUserAsync(username, password);
+    }
+    
+    public async Task<User> FindUser(int userId)
+    {
+        return await listUserView.FindUserAsync(userId);
     }
     
     

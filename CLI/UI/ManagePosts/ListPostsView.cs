@@ -15,18 +15,32 @@ public class ListPostsView(IPostRepository postRepository)
     
     public IQueryable<Post> GetAllPosts()
     {
-        Console.WriteLine("Searching...");
         return postRepository.GetManyPosts();
     }
     
     public async Task<Post> FindPostAsync(string? title, string? body)
     {
         int id = -1;
-        Console.WriteLine("Finding post...");
         for (int i = 0; i < postRepository.GetManyPosts().Count(); i++)
         {
             if (title == postRepository.GetManyPosts().ElementAt(i).Title)
                 if  (body == postRepository.GetManyPosts().ElementAt(i).Body)
+                    id = postRepository.GetManyPosts().ElementAt(i).Id;
+        }
+
+        if (id == -1)
+        {
+            return null;
+        }
+        return await GetOnePostAsync(id);
+    }
+    
+    public async Task<Post> FindPostAsync(int postId)
+    {
+        int id = -1;
+        for (int i = 0; i < postRepository.GetManyPosts().Count(); i++)
+        {
+            if (postId == postRepository.GetManyPosts().ElementAt(i).Id)
                     id = postRepository.GetManyPosts().ElementAt(i).Id;
         }
 
