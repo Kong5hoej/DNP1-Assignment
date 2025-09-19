@@ -11,6 +11,9 @@ namespace CLI.UI;
  * Tjek at man kan logge ind osv.
  * Tilret start i manageUsersView
  * Virker ListPostsView.cs i linje 17-18, når man vil vise kommentarene - få den til at vise brugernavn fremfor brugerID
+ * Kør kun det store while-loop mens man er logget ind
+ * Lav ny dummydata
+ * Tjek at det hele virker, og så lav exercise 3
  */
 
 public class CliApp( 

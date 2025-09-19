@@ -25,17 +25,6 @@ public class ListPostsView(IPostRepository postRepository, ICommentRepository co
             Console.WriteLine($"{comment.UserId}: {comment.Body}");
         }
         
-        /**
-        foreach (Comment comment8 in manageCommentsView.GetAllComments())
-        {
-            if (comment8.PostId == postId)
-            {
-                User commentUser8 = await manageUsersView.FindUser(comment8.UserId);
-                Console.WriteLine($"{comment8.Id} - {commentUser8.Username}: {comment8.Body}");
-            }
-        }
-        **/
-        
         return await postRepository.GetSinglePostAsync(postId);
     }
     
