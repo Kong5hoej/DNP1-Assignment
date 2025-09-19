@@ -3,46 +3,39 @@ using RepositoryContracts;
 
 namespace CLI.UI.ManagePosts;
 
-public class ManagePostsView(IPostRepository postRepository)
+public class ManagePostsView(IPostRepository postRepository, ICommentRepository commentRepository)
 {
     private readonly IPostRepository postRepository = postRepository;
     private readonly CreatePostView createPostView = new CreatePostView(postRepository);
-    private readonly ListPostsView listPostsView = new ListPostsView(postRepository);
-    
-    public async Task UpdatePostAsync(Post post)
+    private readonly ListPostsView listPostsView = new ListPostsView(postRepository, commentRepository);
+
+    public async Task StartAsync(User user)
     { 
-        await postRepository.UpdatePostAsync(post);
-    }
+        Console.WriteLine("What do you want to manage?" +
+                          "\n 1. Create a new post" +
+                          "\n 2. Update a post" +
+                          "\n 3. List one post" +
+                          "\n 4. List all posts" +
+                          "\n 5. Delete an post");
+        int choice = Convert.ToInt32(Console.ReadLine());
 
-    public async Task DeletePostAsync(Post post, int userId)
-    {
-        if (post.UserId != userId)
-            throw new Exception("You can only delete your own posts!");
-        await postRepository.DeletePostAsync(post.Id);
-    }
-
-    public async Task<Post> AddPostAsync(string? title, string? body, int userId)
-    {
-        return await createPostView.AddPostAsync(title, body, userId);
-    }
-
-    public async Task<Post> GetOnePostAsync(int id)
-    {
-        return await listPostsView.GetOnePostAsync(id);
-    }
-
-    public IQueryable<Post> GetAllPosts()
-    {
-        return listPostsView.GetAllPosts();
-    }
-    
-    public async Task<Post> FindPost(string? title, string? body)
-    {
-        return await listPostsView.FindPostAsync(title, body);
-    }
-    
-    public async Task<Post> FindPost(int postId)
-    {
-        return await listPostsView.FindPostAsync(postId);
+        switch (choice)
+        {
+            case 1:
+                await createPostView.AddPostAsync(user);
+                break;
+            case 2:
+                await createPostView.UpdatePostAsync();
+                break;
+            case 3:
+                await listPostsView.GetOnePostAsync();
+                break;
+            case 4:
+                listPostsView.GetAllPosts();
+                break;
+            case 5:
+                await listPostsView.DeletePostAsync(user);
+                break;
+        }
     }
 }

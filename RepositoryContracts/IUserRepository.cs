@@ -9,4 +9,5 @@ public interface IUserRepository
     Task DeleteUserAsync(int id);
     Task<User> GetSingleUserAsync(int id);
     IQueryable<User> GetManyUsers();
+    Task<User> UserLogIn(String? username, String? password);
 }

@@ -8,41 +8,26 @@ public class ManageCommentsView (ICommentRepository commentRepository)
     private readonly ICommentRepository commentRepository = commentRepository;
     private readonly CreateCommentView createCommentView = new CreateCommentView(commentRepository);
     private readonly ListCommentsView listCommentsView = new ListCommentsView(commentRepository);
-    
-    public async Task UpdateCommentAsync(Comment comment)
-    { 
-        await commentRepository.UpdateCommentAsync(comment);
-    }
 
-    public async Task DeleteCommentAsync(Comment comment, int userId)
+    public async Task StartAsync(User user)
     {
-        if (comment.UserId != userId)
-            throw new Exception("You can only delete your own comments!");
-        await commentRepository.DeleteCommentAsync(comment.Id);
-    }
+        Console.WriteLine("What do you want to manage?" +
+                          "\n 1. Create a new comment" +
+                          "\n 2. Update a comment" +
+                          "\n 3. Delete a comment");
+        int choice = Convert.ToInt32(Console.ReadLine());
 
-    public async Task<Comment> AddCommentAsync(int postId, int userId, string? body)
-    {
-        return await createCommentView.AddCommentAsync(postId, userId, body);
-    }
-
-    public async Task<Comment> GetOneCommentAsync(int id)
-    {
-        return await listCommentsView.GetOneCommentAsync(id);
-    }
-
-    public IQueryable<Comment> GetAllComments()
-    {
-        return listCommentsView.GetAllComments();
-    }
-    
-    public async Task<Comment> FindComment(int postId, string? body)
-    {
-        return await listCommentsView.FindCommentAsync(postId, body);
-    }
-    
-    public async Task<Comment> FindComment(int postId, int commentId)
-    {
-        return await listCommentsView.FindCommentAsync(postId, commentId);
+        switch (choice)
+        {
+            case 1:
+                await createCommentView.AddCommentAsync(user);
+                break;
+            case 2:
+                await createCommentView.UpdateCommentAsync();
+                break;
+            case 3:
+                await listCommentsView.DeleteCommentAsync(user);
+                break;
+        }
     }
 }

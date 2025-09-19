@@ -58,4 +58,11 @@ public class CommentInMemoryRepository : ICommentRepository
     {
         return comments.AsQueryable();
     }
+    
+    public async Task<List<Comment>> GetCommentsByPostId(int postId)
+    {
+        List<Comment> comments2 = new List<Comment>();
+        comments2 = comments.Where(c => c.PostId == postId).ToList();
+        return comments2;
+    }
 }

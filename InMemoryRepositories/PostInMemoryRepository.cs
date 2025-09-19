@@ -15,8 +15,20 @@ public class PostInMemoryRepository : IPostRepository
         return Task.FromResult(post);
     }
     
-    public Task UpdatePostAsync(Post post)
+    public Task UpdatePostAsync(String? postTitle)
     {
+        Post post = null;
+        foreach (Post p in posts)
+        {
+            if (p.Title == postTitle) 
+                post = p;
+        }
+
+        if (post == null)
+        {
+            throw new Exception("Post not found");
+        }
+        
         Post? existingPost = posts.SingleOrDefault(p => p.Id == post.Id);
         if (existingPost is null)
         {
@@ -51,6 +63,7 @@ public class PostInMemoryRepository : IPostRepository
             throw new InvalidOperationException(
                 $"Post with ID '{id}' not found");
         }
+        
         return Task.FromResult(post);
     }
     

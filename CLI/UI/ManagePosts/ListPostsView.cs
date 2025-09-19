@@ -4,27 +4,71 @@ using RepositoryContracts;
 
 namespace CLI.UI.ManagePosts;
 
-public class ListPostsView(IPostRepository postRepository)
+public class ListPostsView(IPostRepository postRepository, ICommentRepository commentRepository)
 {
     private readonly IPostRepository postRepository = postRepository;
+    private readonly ICommentRepository commentRepository = commentRepository;
 
-    public async Task<Post> GetOnePostAsync(int id)
+    public async Task<Post> GetOnePostAsync()
     {
-        return await postRepository.GetSinglePostAsync(id);
+        Console.WriteLine("What is the ID of the post, you would like?");
+        int postId = Convert.ToInt32(Console.ReadLine());
+
+        Post post = await postRepository.GetSinglePostAsync(postId);
+        
+        Console.WriteLine($"{postId}: {post.Title}" +
+                          $"\n AuthorID: {post.UserId} " +
+                          $"\n {post.Body} " +
+                          $"\n Comments:");
+        foreach (Comment comment in await commentRepository.GetCommentsByPostId(postId))
+        {
+            Console.WriteLine($"{comment.UserId}: {comment.Body}");
+        }
+        
+        /**
+        foreach (Comment comment8 in manageCommentsView.GetAllComments())
+        {
+            if (comment8.PostId == postId)
+            {
+                User commentUser8 = await manageUsersView.FindUser(comment8.UserId);
+                Console.WriteLine($"{comment8.Id} - {commentUser8.Username}: {comment8.Body}");
+            }
+        }
+        **/
+        
+        return await postRepository.GetSinglePostAsync(postId);
     }
     
     public IQueryable<Post> GetAllPosts()
     {
+        if (!postRepository.GetManyPosts().Any())
+        {
+            Console.WriteLine("There are no posts in our system!");
+        }
+        foreach (Post post in postRepository.GetManyPosts())
+        {
+            Console.WriteLine($"{post.Id}: {post.Title}");
+        }
+        
         return postRepository.GetManyPosts();
     }
     
-    public async Task<Post> FindPostAsync(string? title, string? body)
+    public async Task DeletePostAsync(User user)
+    {
+        Console.WriteLine("What is the title of the post you would like to delete?");
+        String? postTitle = Console.ReadLine();
+        Post post = await FindPostAsync(postTitle);
+        if (post.UserId != user.Id)
+            throw new Exception("You can only delete your own posts!");
+        await postRepository.DeletePostAsync(post.Id);
+    }
+    
+    public async Task<Post> FindPostAsync(string? title)
     {
         int id = -1;
         for (int i = 0; i < postRepository.GetManyPosts().Count(); i++)
         {
             if (title == postRepository.GetManyPosts().ElementAt(i).Title)
-                if  (body == postRepository.GetManyPosts().ElementAt(i).Body)
                     id = postRepository.GetManyPosts().ElementAt(i).Id;
         }
 
@@ -32,22 +76,6 @@ public class ListPostsView(IPostRepository postRepository)
         {
             return null;
         }
-        return await GetOnePostAsync(id);
-    }
-    
-    public async Task<Post> FindPostAsync(int postId)
-    {
-        int id = -1;
-        for (int i = 0; i < postRepository.GetManyPosts().Count(); i++)
-        {
-            if (postId == postRepository.GetManyPosts().ElementAt(i).Id)
-                    id = postRepository.GetManyPosts().ElementAt(i).Id;
-        }
-
-        if (id == -1)
-        {
-            return null;
-        }
-        return await GetOnePostAsync(id);
+        return await postRepository.GetSinglePostAsync(id);
     }
 }

@@ -8,29 +8,59 @@ public class ManageUsersView(IUserRepository userRepository)
     private readonly IUserRepository userRepository = userRepository;
     private readonly CreateUserView createUserView = new CreateUserView(userRepository);
     private readonly ListUserView listUserView = new ListUserView(userRepository);
-    public async Task UpdateUserAsync(User user)
-    { 
-        await userRepository.UpdateUserAsync(user);
-    }
 
-    public async Task DeleteUserAsync(User user)
+    public async Task<User> BeforeAsync()
     {
-        await userRepository.DeleteUserAsync(user.Id);
-    }
+        User user = null;
+        Console.WriteLine("\n What do you want to do?" +
+                          "\n 1. Log in" +
+                          "\n 2. Create a new user");
+        int userChoice = Convert.ToInt32(Console.ReadLine());
+        switch (userChoice)
+        {
+            case 1:
+                user = await createUserView.UserLogIn();
+                break;
+            case 2:
+                user = await createUserView.AddUserAsync();
+                break;
+        }
 
-    public async Task<User> AddUserAsync(string? username, string? password)
-    {
-        return await createUserView.AddUserAsync(username, password);
+        return user;
     }
-
-    public async Task<User> GetOneUserAsync(int id)
+    
+    public async Task StartAsync()
     {
-        return await listUserView.GetOneUserAsync(id);
-    }
+        Console.WriteLine("What do you want to manage?" +
+                          "\n 1. Log in" +
+                          "\n 2. Create a new user " +
+                          "\n 3. Update an user" +
+                          "\n 4. List one user " +
+                          "\n 5. List all users " +
+                          "\n 6. Delete an user");
+        int choice = Convert.ToInt32(Console.ReadLine());
 
-    public IQueryable<User> GetAllUsers()
-    {
-        return listUserView.GetAllUsers();
+        switch (choice)
+        {
+            case 1:
+                await createUserView.UserLogIn();
+                break;
+            case 2:
+                await createUserView.AddUserAsync();
+                break;
+            case 3:
+                await createUserView.UpdateUserAsync();
+                break;
+            case 4:
+                await listUserView.GetOneUserAsync();
+                break;
+            case 5:
+                listUserView.GetAllUsers();
+                break;
+            case 6:
+                await listUserView.DeleteUserAsync();
+                break;
+        }
     }
 
     public async Task<User> FindUser(string? username, string? password)
@@ -38,10 +68,8 @@ public class ManageUsersView(IUserRepository userRepository)
         return await listUserView.FindUserAsync(username, password);
     }
     
-    public async Task<User> FindUser(int userId)
+    public async Task<User> FindUser(int id)
     {
-        return await listUserView.FindUserAsync(userId);
+        return await listUserView.FindUserAsync(id);
     }
-    
-    
 }

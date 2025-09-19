@@ -6,6 +6,23 @@ namespace InMemoryRepositories;
 public class UserInMemoryRepository : IUserRepository
 {
     private List<User> users = new List<User>();
+
+    public Task<User> UserLogIn(String? username, String? password)
+    {
+        User returnUser = null;
+        if (username == null || password == null)
+            throw new Exception("User is not created");
+        foreach (User user in users)
+        {
+            if (user.Username == username && user.Password == password)
+            {
+                returnUser = user;
+                break;
+            }
+        }
+        return Task.FromResult(returnUser);
+    }
+    
     public Task<User> AddUserAsync(User user)
     {
         user.Id = users.Any() 

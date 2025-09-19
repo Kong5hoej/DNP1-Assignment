@@ -7,14 +7,34 @@ public class ListUserView (IUserRepository userRepository)
 {
     private readonly IUserRepository userRepository = userRepository;
 
-    public async Task<User> GetOneUserAsync(int id)
+    public async Task GetOneUserAsync()
     {
-        return await userRepository.GetSingleUserAsync(id);
+        Console.WriteLine("What is the ID of the user?");
+        int id =  Convert.ToInt32(Console.ReadLine());
+        
+        await userRepository.GetSingleUserAsync(id);
     }
-    
-    public IQueryable<User> GetAllUsers()
+
+    public IQueryable GetAllUsers()
     {
         return userRepository.GetManyUsers();
+    }
+    
+    public async Task DeleteUserAsync()
+    {
+        Console.WriteLine("What is your username?");
+        String? username = Console.ReadLine();
+        Console.WriteLine("What is your password?");
+        String? password = Console.ReadLine();
+        try
+        {
+            User user = await FindUserAsync(username, password);
+            await userRepository.DeleteUserAsync(user.Id);
+        }
+        catch (Exception e)
+        {
+            Console.WriteLine(e);
+        }
     }
     
     public async Task<User> FindUserAsync(string? username, string? password)
@@ -31,7 +51,7 @@ public class ListUserView (IUserRepository userRepository)
         {
             return null;
         }
-        return await GetOneUserAsync(id);
+        return await userRepository.GetSingleUserAsync(id);
     }
     
     public async Task<User> FindUserAsync(int userId)
@@ -47,6 +67,6 @@ public class ListUserView (IUserRepository userRepository)
         {
             return null;
         }
-        return await GetOneUserAsync(id);
+        return await userRepository.GetSingleUserAsync(id);
     }
 }
