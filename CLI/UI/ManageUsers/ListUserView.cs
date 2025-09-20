@@ -12,11 +12,20 @@ public class ListUserView (IUserRepository userRepository)
         Console.WriteLine("What is the ID of the user?");
         int id =  Convert.ToInt32(Console.ReadLine());
         
-        await userRepository.GetSingleUserAsync(id);
+        User user = await userRepository.GetSingleUserAsync(id);
+        Console.WriteLine($"The user has now been retrieved! The username is {user.Username} and the ID is {user.Id}");
     }
 
     public IQueryable GetAllUsers()
     {
+        if (!userRepository.GetManyUsers().Any())
+        {
+            Console.WriteLine("There are no users in our system!");
+        }
+        foreach (User user in userRepository.GetManyUsers())
+        {
+            Console.WriteLine($"{user.Id}: {user.Username}");
+        }
         return userRepository.GetManyUsers();
     }
     

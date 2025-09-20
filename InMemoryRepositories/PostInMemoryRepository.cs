@@ -71,4 +71,13 @@ public class PostInMemoryRepository : IPostRepository
     {
         return posts.AsQueryable();
     }
+
+    public void DummyData()
+    {
+        AddPostAsync(new Post("I can program in Java", "If you need my help, I can program in Java!", 3));
+        AddPostAsync(new Post("I can program in C#", "If you need my help, I can program in C#!", 2));
+        AddPostAsync(new Post("I can program in HTML", "If you need my help, I can program in HTML!", 2));
+        AddPostAsync(new Post("I can use an Arduino", "If you need my help, I use an Arduino!", 4));
+        AddPostAsync(new Post("I can calculate big-O", "If you need my help, I can calculate big-0!", 5));
+    }
 }

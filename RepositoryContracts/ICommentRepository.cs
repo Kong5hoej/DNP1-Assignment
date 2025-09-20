@@ -10,4 +10,5 @@ public interface ICommentRepository
     Task<Comment> GetSingleCommentAsync(int id);
     IQueryable<Comment> GetManyComments();
     Task<List<Comment>> GetCommentsByPostId(int postId);
+    void DummyData();
 }

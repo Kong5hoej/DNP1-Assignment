@@ -12,52 +12,58 @@ public class ManageUsersView(IUserRepository userRepository)
     public async Task<User> BeforeAsync()
     {
         User user = null;
-        Console.WriteLine("\n What do you want to do?" +
-                          "\n 1. Log in" +
-                          "\n 2. Create a new user");
-        int userChoice = Convert.ToInt32(Console.ReadLine());
-        switch (userChoice)
+        while (user == null)
         {
-            case 1:
-                user = await createUserView.UserLogIn();
-                break;
-            case 2:
-                user = await createUserView.AddUserAsync();
-                break;
+            Console.WriteLine("\n What do you want to do?" +
+                              "\n 1. Log in" +
+                              "\n 2. Create a new user");
+            int userChoice = Convert.ToInt32(Console.ReadLine());
+            switch (userChoice)
+            {
+                case 1:
+                    user = await createUserView.UserLogIn();
+                    if (user == null)
+                    {
+                        Console.WriteLine("Incorrect credentials, try again!");
+                    }
+                    break;
+                case 2:
+                    user = await createUserView.AddUserAsync();
+                    break;
+            }
         }
 
         return user;
+        
     }
     
     public async Task StartAsync()
     {
-        Console.WriteLine("What do you want to manage?" +
-                          "\n 1. Log in" +
-                          "\n 2. Create a new user " +
-                          "\n 3. Update an user" +
-                          "\n 4. List one user " +
-                          "\n 5. List all users " +
-                          "\n 6. Delete an user");
+        Console.WriteLine("What do you want to manage?"+
+                          "\n 1. Update an user" +
+                          "\n 2. List one user " +
+                          "\n 3. List all users " +
+                          "\n 4. Delete an user" +
+                          "\n 5. Exit");
         int choice = Convert.ToInt32(Console.ReadLine());
+        
+        if (choice == 5)
+        {
+            return;
+        }
 
         switch (choice)
         {
             case 1:
-                await createUserView.UserLogIn();
-                break;
-            case 2:
-                await createUserView.AddUserAsync();
-                break;
-            case 3:
                 await createUserView.UpdateUserAsync();
                 break;
-            case 4:
+            case 2:
                 await listUserView.GetOneUserAsync();
                 break;
-            case 5:
+            case 3:
                 listUserView.GetAllUsers();
                 break;
-            case 6:
+            case 4:
                 await listUserView.DeleteUserAsync();
                 break;
         }

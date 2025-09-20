@@ -28,12 +28,6 @@ public class UserInMemoryRepository : IUserRepository
         user.Id = users.Any() 
             ? users.Max(u => u.Id) + 1
             : 1;
-
-        for (int i = 0; i < users.Count; i++)
-        {
-            if (user.Username ==  users[i].Username)
-                throw new Exception("Username already exists");
-        }
         
         users.Add(user);
         return Task.FromResult(user);
@@ -84,5 +78,14 @@ public class UserInMemoryRepository : IUserRepository
     public IQueryable<User> GetManyUsers()
     {
         return users.AsQueryable();
+    }
+
+    public void DummyData()
+    {
+        AddUserAsync(new User("Bob", "password"));
+        AddUserAsync(new User("Michael", "password"));
+        AddUserAsync(new User("Jan", "password"));
+        AddUserAsync(new User("Erland", "password"));
+        AddUserAsync(new User("Lars", "password"));
     }
 }

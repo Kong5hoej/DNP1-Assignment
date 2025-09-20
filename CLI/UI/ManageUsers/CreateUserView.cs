@@ -14,27 +14,41 @@ public class CreateUserView (IUserRepository userRepository)
         Console.WriteLine("What is your password?");
         String? password = Console.ReadLine();
         
-        return await userRepository.UserLogIn(username, password);
+        try
+        {
+            User user = await userRepository.UserLogIn(username, password);
+            return user;
+        }
+        catch (Exception e)
+        {
+            Console.WriteLine(e);
+        }
+
+        throw new Exception("User is not found!");
     }
 
     public async Task<User> AddUserAsync()
     {
-        Console.WriteLine("What will the username be?");
-        String? username = Console.ReadLine();
-        Console.WriteLine("What will the password be?");
-        String? password = Console.ReadLine();
-        User user = new User(username, password);
-        try
+        User? user = null;
+
+        while (user == null)
         {
-            await userRepository.AddUserAsync(user);
+            Console.WriteLine("What will the username be?");
+            string? username = Console.ReadLine();
+
+            if (userRepository.GetManyUsers().Any(u => u.Username == username))
+            {
+                Console.WriteLine("Username is already in use. Enter a different username.");
+                continue; 
+            }
+
+            Console.WriteLine("What will the password be?");
+            string? password = Console.ReadLine();
+
+            User tempUser = new User(username, password);
+            user = await userRepository.AddUserAsync(tempUser);
         }
-        catch (Exception e)
-        {
-            Console.WriteLine("Username is already in use. Enter a different username: ");
-            username = Console.ReadLine();
-            user.Username = username;
-            await userRepository.AddUserAsync(user);
-        }
+
         Console.WriteLine("The user has now been created!");
         return user;
     }

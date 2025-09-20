@@ -10,4 +10,5 @@ public interface IUserRepository
     Task<User> GetSingleUserAsync(int id);
     IQueryable<User> GetManyUsers();
     Task<User> UserLogIn(String? username, String? password);
+    void DummyData();
 }

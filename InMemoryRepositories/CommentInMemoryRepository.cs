@@ -65,4 +65,13 @@ public class CommentInMemoryRepository : ICommentRepository
         comments2 = comments.Where(c => c.PostId == postId).ToList();
         return comments2;
     }
+
+    public void DummyData()
+    {
+        AddCommentAsync(new Comment(1, 2, "Please help me, Jan!"));
+        AddCommentAsync(new Comment(4, 1, "Help me use an Arduino!"));
+        AddCommentAsync(new Comment(3, 3, "Help me program in HTML, Michael!"));
+        AddCommentAsync(new Comment(5, 4, "I don't understand big-O, help me!"));
+        AddCommentAsync(new Comment(2, 5, "Let me analyse your C# program!"));
+    }
 }

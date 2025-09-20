@@ -14,8 +14,14 @@ public class ManageCommentsView (ICommentRepository commentRepository)
         Console.WriteLine("What do you want to manage?" +
                           "\n 1. Create a new comment" +
                           "\n 2. Update a comment" +
-                          "\n 3. Delete a comment");
+                          "\n 3. Delete a comment" +
+                          "\n 4. Exit");
         int choice = Convert.ToInt32(Console.ReadLine());
+
+        if (choice == 4)
+        {
+            return;
+        }
 
         switch (choice)
         {

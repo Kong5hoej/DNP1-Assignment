@@ -3,11 +3,11 @@ using RepositoryContracts;
 
 namespace CLI.UI.ManagePosts;
 
-public class ManagePostsView(IPostRepository postRepository, ICommentRepository commentRepository)
+public class ManagePostsView(IPostRepository postRepository, ICommentRepository commentRepository, IUserRepository userRepository)
 {
     private readonly IPostRepository postRepository = postRepository;
     private readonly CreatePostView createPostView = new CreatePostView(postRepository);
-    private readonly ListPostsView listPostsView = new ListPostsView(postRepository, commentRepository);
+    private readonly ListPostsView listPostsView = new ListPostsView(postRepository, commentRepository, userRepository);
 
     public async Task StartAsync(User user)
     { 
@@ -16,8 +16,14 @@ public class ManagePostsView(IPostRepository postRepository, ICommentRepository 
                           "\n 2. Update a post" +
                           "\n 3. List one post" +
                           "\n 4. List all posts" +
-                          "\n 5. Delete an post");
+                          "\n 5. Delete an post" +
+                          "\n 6. Exit");
         int choice = Convert.ToInt32(Console.ReadLine());
+        
+        if (choice == 6)
+        {
+            return;
+        }
 
         switch (choice)
         {

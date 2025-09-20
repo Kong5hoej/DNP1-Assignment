@@ -4,10 +4,12 @@ using RepositoryContracts;
 
 namespace CLI.UI.ManagePosts;
 
-public class ListPostsView(IPostRepository postRepository, ICommentRepository commentRepository)
+public class ListPostsView(IPostRepository postRepository, ICommentRepository commentRepository, IUserRepository userRepository)
 {
     private readonly IPostRepository postRepository = postRepository;
     private readonly ICommentRepository commentRepository = commentRepository;
+    private readonly IUserRepository userRepository = userRepository;
+    
 
     public async Task<Post> GetOnePostAsync()
     {
@@ -15,14 +17,16 @@ public class ListPostsView(IPostRepository postRepository, ICommentRepository co
         int postId = Convert.ToInt32(Console.ReadLine());
 
         Post post = await postRepository.GetSinglePostAsync(postId);
+        User userPost = await userRepository.GetSingleUserAsync(post.UserId);
         
         Console.WriteLine($"{postId}: {post.Title}" +
-                          $"\n AuthorID: {post.UserId} " +
+                          $"\n Author: {userPost.Username} " +
                           $"\n {post.Body} " +
                           $"\n Comments:");
         foreach (Comment comment in await commentRepository.GetCommentsByPostId(postId))
         {
-            Console.WriteLine($"{comment.UserId}: {comment.Body}");
+            User userComment =  await userRepository.GetSingleUserAsync(comment.UserId);
+            Console.WriteLine($"{userComment.Username}: {comment.Body}");
         }
         
         return await postRepository.GetSinglePostAsync(postId);
