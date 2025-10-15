@@ -25,6 +25,9 @@ public class UserFileRepository : IUserRepository
             ? users.Max(u => u.Id) + 1
             : 1;
         
+        if (users.Contains(user))
+            return null;
+        
         users.Add(user);
         
         usersAsJson = JsonSerializer.Serialize(users);
@@ -48,6 +51,7 @@ public class UserFileRepository : IUserRepository
         }
         users.Remove(existingUser);
         users.Add(user);
+        
         
         usersAsJson = JsonSerializer.Serialize(users);
         await File.WriteAllTextAsync(filePath, usersAsJson);
@@ -114,14 +118,5 @@ public class UserFileRepository : IUserRepository
         usersAsJson = JsonSerializer.Serialize(users);
         await File.WriteAllTextAsync(filePath, usersAsJson);
         return returnUser;
-    }
-
-    public async void DummyData()
-    {
-        await AddUserAsync(new User("Bob", "password"));
-        await AddUserAsync(new User("Michael", "password"));
-        await AddUserAsync(new User("Jan", "password"));
-        await AddUserAsync(new User("Erland", "password"));
-        await AddUserAsync(new User("Lars", "password"));
     }
 }

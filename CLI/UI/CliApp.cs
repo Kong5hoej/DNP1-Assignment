@@ -55,7 +55,6 @@ public class CliApp(
 
     private void initialiseDummyData()
     {
-        userRepository.DummyData();
         postRepository.DummyData();
         commentRepository.DummyData();
     }
