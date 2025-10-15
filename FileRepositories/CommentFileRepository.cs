@@ -10,9 +10,15 @@ public class CommentFileRepository : ICommentRepository
 
     public CommentFileRepository()
     {
-        if (!File.Exists(filePath))
+        if (!File.Exists(filePath) || new FileInfo(filePath).Length == 0)
         {
             File.WriteAllText(filePath, "[]");
+            
+            AddCommentAsync(new Comment(1, 2, "Please help me, Jan!"));
+            AddCommentAsync(new Comment(4, 1, "Help me use an Arduino!"));
+            AddCommentAsync(new Comment(3, 3, "Help me program in HTML, Michael!"));
+            AddCommentAsync(new Comment(5, 4, "I don't understand big-O, help me!"));
+            AddCommentAsync(new Comment(2, 5, "Let me analyse your C# program!"));
         }
     }
     public async Task<Comment> AddCommentAsync(Comment comment)
