@@ -21,7 +21,6 @@ public class CliApp(
 
     public async Task StartAsync()
     {
-        initialiseDummyData();
         User user = await manageUsersView.BeforeAsync();
         
         while (user != null)
@@ -51,11 +50,5 @@ public class CliApp(
                     break;
             }
         }
-    }
-
-    private void initialiseDummyData()
-    {
-        postRepository.DummyData();
-        commentRepository.DummyData();
     }
 }

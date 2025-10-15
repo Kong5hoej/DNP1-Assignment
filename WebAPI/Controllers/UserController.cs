@@ -31,7 +31,7 @@ public class UserController : ControllerBase
                 Id = created.Id,
                 Username = created.Username
             };
-            return Created($"/Users/{dto.Id}", dto);
+            return Created($"/User/{dto.Id}", dto);
         }
         catch (Exception e)
         {
@@ -113,7 +113,7 @@ public class UserController : ControllerBase
     
     //Delete
     [HttpDelete("delete/{id:int}")]
-    public async Task<ActionResult<IEnumerable<UserDto>>> DeleteUser(int id)
+    public async Task<ActionResult<UserDto>> DeleteUser(int id)
     { 
         try
         { 

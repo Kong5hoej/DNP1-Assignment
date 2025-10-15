@@ -31,22 +31,14 @@ public class PostFileRepository : IPostRepository
         return post;
     }
 
-    public async Task UpdatePostAsync(string? postTitle)
+    public async Task UpdatePostAsync(Post post)
     {
         string postsAsJson = await File.ReadAllTextAsync(filePath);
         List<Post> posts = JsonSerializer.Deserialize<List<Post>>(postsAsJson)!;
         
-        Post post = null;
-        foreach (Post p in posts)
-        {
-            if (p.Title == postTitle) 
-                post = p;
-        }
+        if (post is null)
+            throw new ArgumentNullException(nameof(post));
 
-        if (post == null)
-        {
-            throw new Exception("Post not found");
-        }
         
         Post? existingPost = posts.SingleOrDefault(p => p.Id == post.Id);
         if (existingPost is null)
@@ -54,6 +46,7 @@ public class PostFileRepository : IPostRepository
             throw new InvalidOperationException(
                 $"Post with ID '{post.Id}' not found");
         }
+        
         posts.Remove(existingPost);
         posts.Add(post);
         

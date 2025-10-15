@@ -23,6 +23,6 @@ public class CreatePostView (IPostRepository postRepository)
         Console.WriteLine("Which post do you want to update? (Write the title of the post)");
         String? postTitle = Console.ReadLine();
         
-        await postRepository.UpdatePostAsync(postTitle);
+        //await postRepository.UpdatePostAsync(postTitle);
     }
 }
