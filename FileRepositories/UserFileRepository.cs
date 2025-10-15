@@ -10,16 +10,11 @@ public class UserFileRepository : IUserRepository
 
     public UserFileRepository()
     {
-        if (!File.Exists(filePath) || new FileInfo(filePath).Length == 0)
+        if (!File.Exists(filePath))
         {
             File.WriteAllText(filePath, "[]");
-            
-            AddUserAsync(new User("Bob", "password"));
-            AddUserAsync(new User("Michael", "password"));
-            AddUserAsync(new User("Jan", "password"));
-            AddUserAsync(new User("Erland", "password"));
-            AddUserAsync(new User("Lars", "password"));
         }
+
     }
     
     public async Task<User> AddUserAsync(User user)

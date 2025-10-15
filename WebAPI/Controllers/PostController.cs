@@ -74,17 +74,16 @@ public class PostController : ControllerBase
     
     //Get single
     [HttpGet("{id:int}")]
-    public async Task<ActionResult<PostDto>> GetSinglePost(int id)
+    public async Task<ActionResult<GetSinglePostDto>> GetSinglePost(int id)
     { 
         try
         { 
             Post post = await postRepo.GetSinglePostAsync(id);
-            PostDto dto = new()
+            GetSinglePostDto dto = new()
             {
                 Title =  post.Title,
                 Body = post.Body,
-                UserId = post.UserId,
-                Id = post.Id
+                UserId = post.UserId
             };
             return Ok(dto);
         }

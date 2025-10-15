@@ -10,15 +10,9 @@ public class CommentFileRepository : ICommentRepository
 
     public CommentFileRepository()
     {
-        if (!File.Exists(filePath) || new FileInfo(filePath).Length == 0)
+        if (!File.Exists(filePath))
         {
             File.WriteAllText(filePath, "[]");
-            
-            AddCommentAsync(new Comment(1, 2, "Please help me, Jan!"));
-            AddCommentAsync(new Comment(4, 1, "Help me use an Arduino!"));
-            AddCommentAsync(new Comment(3, 3, "Help me program in HTML, Michael!"));
-            AddCommentAsync(new Comment(5, 4, "I don't understand big-O, help me!"));
-            AddCommentAsync(new Comment(2, 5, "Let me analyse your C# program!"));
         }
     }
     public async Task<Comment> AddCommentAsync(Comment comment)
@@ -100,14 +94,5 @@ public class CommentFileRepository : ICommentRepository
         commentsAsJson = JsonSerializer.Serialize(comments);
         await File.WriteAllTextAsync(filePath, commentsAsJson);
         return comments2;
-    }
-
-    public async void DummyData()
-    {
-        await AddCommentAsync(new Comment(1, 2, "Please help me, Jan!"));
-        await AddCommentAsync(new Comment(4, 1, "Help me use an Arduino!"));
-        await AddCommentAsync(new Comment(3, 3, "Help me program in HTML, Michael!"));
-        await AddCommentAsync(new Comment(5, 4, "I don't understand big-O, help me!"));
-        await AddCommentAsync(new Comment(2, 5, "Let me analyse your C# program!"));
     }
 }

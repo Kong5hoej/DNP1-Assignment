@@ -69,12 +69,12 @@ public class UserController : ControllerBase
     
     //Get single
     [HttpGet("{id:int}")]
-    public async Task<ActionResult<UserDto>> GetSingleUser(int id)
+    public async Task<ActionResult<GetSingleUserDto>> GetSingleUser(int id)
     { 
         try
         { 
             User user = await userRepo.GetSingleUserAsync(id);
-            UserDto dto = new()
+            GetSingleUserDto dto = new()
             {
                 Id = user.Id,
                 Username = user.Username
