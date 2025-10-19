@@ -1,8 +1,7 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using RepositoryContracts;
-using ApiContracts;
+using ApiContracts.Comments;
 using ApiContracts.Posts;
-using ApiContracts.Users;
 using Entities;
 
 namespace WebAPI.Controllers;
@@ -13,10 +12,14 @@ namespace WebAPI.Controllers;
 public class PostController : ControllerBase
 {
     private readonly IPostRepository postRepo;
+    private readonly IUserRepository userRepo;
+    private readonly ICommentRepository commentRepo;
 
-    public PostController(IPostRepository postRepo)
+    public PostController(IPostRepository postRepo, IUserRepository userRepo, ICommentRepository commentRepo)
     {
         this.postRepo = postRepo;
+        this.userRepo = userRepo;
+        this.commentRepo = commentRepo;
     }
     
     //Create
@@ -79,11 +82,25 @@ public class PostController : ControllerBase
         try
         { 
             Post post = await postRepo.GetSinglePostAsync(id);
+            
+            var allComments = commentRepo.GetManyComments().ToList();
+            var relatedComments = allComments
+                .Where(c => c.PostId == id)
+                .Select(c => new CommentDto
+                {
+                    Id = c.Id,
+                    Body = c.Body,
+                    UserId = c.UserId,
+                    PostId = c.PostId
+                })
+                .ToList();
+            
             GetSinglePostDto dto = new()
             {
                 Title =  post.Title,
                 Body = post.Body,
-                UserId = post.UserId
+                UserId = post.UserId,
+                Comments =  relatedComments
             };
             return Ok(dto);
         }
@@ -96,18 +113,43 @@ public class PostController : ControllerBase
     
     //GetMany
     [HttpGet]
-    public async Task<ActionResult<IEnumerable<PostDto>>> GetManyPosts()
+    public async Task<ActionResult<IEnumerable<PostDto>>> GetManyPosts(
+        [FromQuery] string? title = null,
+        [FromQuery] int? userId = null,
+        [FromQuery] string? username = null
+    )
     { 
         try
         { 
             List<Post> posts = postRepo.GetManyPosts().ToList();
             
-            var dtos = posts.Select(u => new PostDto
+            if (!string.IsNullOrWhiteSpace(title))
+                posts = posts
+                    .Where(p => p.Title.Contains(title, StringComparison.OrdinalIgnoreCase))
+                    .ToList();
+
+            if (userId.HasValue)
+                posts = posts
+                    .Where(p => p.UserId == userId.Value)
+                    .ToList();
+
+            if (!string.IsNullOrWhiteSpace(username))
             {
-                Title =  u.Title,
-                Body = u.Body,
-                UserId = u.UserId,
-                Id = u.Id
+                var users = userRepo.GetManyUsers().ToList();
+                var user = users.FirstOrDefault(u => 
+                    u.Username.Equals(username, StringComparison.OrdinalIgnoreCase));
+                if (user != null)
+                    posts = posts.Where(p => p.UserId == user.Id).ToList();
+                else
+                    posts.Clear(); // ingen brugere matcher -> tomt resultat
+            }
+            
+            var dtos = posts.Select(p => new PostDto
+            {
+                Id = p.Id,
+                Title = p.Title,
+                Body = p.Body,
+                UserId = p.UserId
             }).ToList();
             
             return Ok(dtos);
@@ -115,7 +157,7 @@ public class PostController : ControllerBase
         catch (Exception e)
         {
             Console.WriteLine(e);
-            throw;
+            return StatusCode(500, "An error occurred while retrieving posts.");
         }
     }
     

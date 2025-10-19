@@ -12,10 +12,12 @@ namespace WebAPI.Controllers;
 public class CommentController : ControllerBase
 {
     private readonly ICommentRepository commentRepo;
+    private readonly IUserRepository userRepo;
 
-    public CommentController(ICommentRepository commentRepo, IPostRepository postRepo)
+    public CommentController(ICommentRepository commentRepo, IUserRepository userRepo)
     {
         this.commentRepo = commentRepo;
+        this.userRepo = userRepo;
     }
     
     //Create
@@ -95,20 +97,47 @@ public class CommentController : ControllerBase
     
     //GetMany
     [HttpGet]
-    public async Task<ActionResult<IEnumerable<CommentDto>>> GetManyComments()
+    public async Task<ActionResult<IEnumerable<CommentDto>>> GetManyComments(
+        [FromQuery] int? userId = null,
+        [FromQuery] string? username = null,
+        [FromQuery] int? postId = null)
     { 
         try
         { 
             List<Comment> comments = commentRepo.GetManyComments().ToList();
-            
-            var dtos = comments.Select(u => new CommentDto
+
+            if (userId.HasValue)
+                comments = comments
+                    .Where(c => c.UserId == userId.Value)
+                    .ToList();
+
+            if (!string.IsNullOrWhiteSpace(username))
             {
-                Body = u.Body,
-                UserId = u.UserId,
-                Id = u.Id,
-                PostId = u.PostId
+                var users = userRepo.GetManyUsers().ToList();
+                var user = users.FirstOrDefault(u =>
+                    u.Username.Equals(username, StringComparison.OrdinalIgnoreCase));
+
+                if (user != null)
+                    comments = comments
+                        .Where(c => c.UserId == user.Id)
+                        .ToList();
+                else
+                    comments.Clear();
+            }
+
+            if (postId.HasValue)
+                comments = comments
+                    .Where(c => c.PostId == postId.Value)
+                    .ToList();
+
+            var dtos = comments.Select(c => new CommentDto
+            {
+                Id = c.Id,
+                Body = c.Body,
+                UserId = c.UserId,
+                PostId = c.PostId
             }).ToList();
-            
+
             return Ok(dtos);
         }
         catch (Exception e)
