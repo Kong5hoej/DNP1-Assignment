@@ -8,7 +8,7 @@ namespace WebAPI.Controllers;
 
 
 [ApiController]
-[Route("[controller]")]
+[Route("[controller]s")]
 public class CommentController : ControllerBase
 {
     private readonly ICommentRepository commentRepo;
@@ -21,7 +21,7 @@ public class CommentController : ControllerBase
     }
     
     //Create
-    [HttpPost("/Post/{postId:int}")]
+    [HttpPost("/Posts/{postId:int}")]
     public async Task<ActionResult<CommentDto>> AddComment(int postId, [FromBody] CreateCommentDto request)
     { 
         try
@@ -35,7 +35,7 @@ public class CommentController : ControllerBase
                 Body = created.Body,
                 PostId = postId
             };
-            return Created($"/Post/{dto.PostId}", dto);
+            return Created($"/Posts/{dto.PostId}", dto);
         }
         catch (Exception e)
         {
@@ -45,7 +45,7 @@ public class CommentController : ControllerBase
     }
     
     //Update
-    [HttpPut("/Post/{postId:int}")]
+    [HttpPut("/Posts/{postId:int}")]
     public async Task<ActionResult<CommentDto>> UpdateComment(int postId, [FromBody] UpdateCommentDto request)
     { 
         try

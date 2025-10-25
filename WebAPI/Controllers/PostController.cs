@@ -8,7 +8,7 @@ namespace WebAPI.Controllers;
 
 
 [ApiController]
-[Route("[controller]")]
+[Route("[controller]s")]
 public class PostController : ControllerBase
 {
     private readonly IPostRepository postRepo;
@@ -37,7 +37,7 @@ public class PostController : ControllerBase
                 UserId =  created.UserId,
                 Body = created.Body
             };
-            return Created($"/Post/{dto.Id}", dto);
+            return Created($"/Posts/{dto.Id}", dto);
         }
         catch (Exception e)
         {
@@ -141,7 +141,7 @@ public class PostController : ControllerBase
                 if (user != null)
                     posts = posts.Where(p => p.UserId == user.Id).ToList();
                 else
-                    posts.Clear(); // ingen brugere matcher -> tomt resultat
+                    posts.Clear();
             }
             
             var dtos = posts.Select(p => new PostDto
@@ -157,7 +157,7 @@ public class PostController : ControllerBase
         catch (Exception e)
         {
             Console.WriteLine(e);
-            return StatusCode(500, "An error occurred while retrieving posts.");
+            throw;
         }
     }
     

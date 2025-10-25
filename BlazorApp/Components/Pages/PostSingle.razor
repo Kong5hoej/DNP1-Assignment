@@ -1,0 +1,53 @@
+﻿@page "/posts/{PostId:int}"
+@using ApiContracts.Posts
+@using ApiContracts.Users
+@using BlazorApp.Services
+@inject IPostService PostService
+@inject IUserService UserService
+
+@if (post == null)
+{
+    <p>Loading...</p>
+}
+else
+{
+    <h3>@post.Title</h3>
+    <p>@post.Body</p>
+    <p><strong>User:</strong> @GetUsername(post.UserId)</p>
+
+    <h5>Comments</h5>
+    @if (!post.Comments.Any())
+    {
+        <p>No comments yet.</p>
+    }
+    else
+    {
+        <ul>
+            @foreach (var comment in post.Comments)
+            {
+                <li>@comment.Body (User: @GetUsername(comment.UserId))</li>
+            }
+        </ul>
+    }
+}
+
+@code {
+    [Parameter]
+    public int PostId { get; set; }
+
+    private GetSinglePostDto? post;
+    private Dictionary<int, string> userLookup = new();
+    
+    protected override async Task OnInitializedAsync()
+    {
+        post = await PostService.GetSinglePost(PostId);
+        
+        var users = await UserService.GetManyUsers();
+        userLookup = users.ToDictionary(u => u.Id, u => u.Username);
+    }
+    
+    private string GetUsername(int userId)
+    {
+        return userLookup.TryGetValue(userId, out var username) ? username : "Unknown";
+    }
+}

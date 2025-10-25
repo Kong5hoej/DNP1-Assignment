@@ -8,7 +8,7 @@ namespace WebAPI.Controllers;
 
 
 [ApiController]
-[Route("[controller]")]
+[Route("[controller]s")]
 public class UserController : ControllerBase
 {
     private readonly IUserRepository userRepo;
@@ -31,7 +31,7 @@ public class UserController : ControllerBase
                 Id = created.Id,
                 Username = created.Username
             };
-            return Created($"/User/{dto.Id}", dto);
+            return Created($"/Users/{dto.Id}", dto);
         }
         catch (Exception e)
         {

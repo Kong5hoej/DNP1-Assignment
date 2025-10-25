@@ -1,0 +1,33 @@
+﻿@page "/users"
+@using ApiContracts.Users
+@using BlazorApp.Services
+@using Microsoft.AspNetCore.Mvc
+@inject IUserService UserService
+@rendermode InteractiveServer
+
+<PageTitle>Users</PageTitle>
+
+<h1>Users</h1>
+
+@if (users == null)
+{
+    <p>Loading...</p>
+}
+else
+{
+    <ul>
+        @foreach (var user in users)
+        {
+            <li>@user.Username</li>
+        }
+    </ul>
+}
+
+@code {
+    private List<UserDto>? users;
+
+    protected override async Task OnInitializedAsync()
+    {
+        users = await UserService.GetManyUsers();
+    }
+}
