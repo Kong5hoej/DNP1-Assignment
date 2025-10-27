@@ -15,12 +15,16 @@ public class HttpCommentService : ICommentService
 
     public async Task<CommentDto> AddComment(CreateCommentDto request)
     {
-        HttpResponseMessage httpResponse = await client.PostAsJsonAsync("comments", request);
+        HttpResponseMessage httpResponse = await client.PostAsJsonAsync($"/Posts/{request.PostId}", request);
         string response = await httpResponse.Content.ReadAsStringAsync();
+        
+        Console.WriteLine($"Response status: {httpResponse.StatusCode}");
+        Console.WriteLine($"Response body: {response}");
 
         if (!httpResponse.IsSuccessStatusCode)
         {
-            throw new Exception(response);
+            //throw new Exception(response);
+            throw new Exception($"Error adding comment: {response}");
         }
         return JsonSerializer.Deserialize<CommentDto>(response, new JsonSerializerOptions
         {
@@ -70,7 +74,7 @@ public class HttpCommentService : ICommentService
 
     public async Task<CommentDto> UpdateComment(int id, UpdateCommentDto request)
     {
-        HttpResponseMessage httpResponse = await client.PutAsJsonAsync($"comments/{id}", request);
+        HttpResponseMessage httpResponse = await client.PutAsJsonAsync($"/Posts/{request.Id}", request);
         string response = await httpResponse.Content.ReadAsStringAsync();
 
         if (!httpResponse.IsSuccessStatusCode)

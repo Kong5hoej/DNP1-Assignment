@@ -1,4 +1,5 @@
 ﻿@page "/users"
+@using System.Net.Security
 @using ApiContracts.Users
 @using BlazorApp.Services
 @using Microsoft.AspNetCore.Mvc
@@ -23,10 +24,48 @@ else
     </ul>
 }
 
+<h1>Add New User</h1>
+<div class="row mt-3">
+    <div class="col-sm-3">
+        <input @bind="Username" type="text" placeholder="Username" required>
+    </div>
+</div>
+
+<div class="row mt-3">
+    <div class="col-sm-3">
+        <input @bind="Password" type="text" placeholder="Password" required>
+    </div>
+</div>
+
+<div class="row mt-3">
+    <div class="col-sm-3">
+        <button @onclick="AddUser" class="btn btn-primary">Add User</button>
+    </div>
+</div>
+
+
 @code {
     private List<UserDto>? users;
 
     protected override async Task OnInitializedAsync()
+    {
+        users = await UserService.GetManyUsers();
+    }
+
+    public string Username { get; set; }
+    public string Password { get; set; }
+    public async void AddUser()
+    {
+        CreateUserDto cud = new CreateUserDto() { Username = this.Username, Password = this.Password };
+        await UserService.AddUser(cud);
+        await LoadUsers();
+        Username = "";
+        Password = "";
+
+        StateHasChanged();
+    }
+
+    public async Task LoadUsers()
     {
         users = await UserService.GetManyUsers();
     }

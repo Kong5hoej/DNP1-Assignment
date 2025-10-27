@@ -1,9 +1,11 @@
 ﻿@page "/posts/{PostId:int}"
+@using ApiContracts.Comments
 @using ApiContracts.Posts
 @using ApiContracts.Users
 @using BlazorApp.Services
 @inject IPostService PostService
 @inject IUserService UserService
+@inject ICommentService CommentService
 
 @if (post == null)
 {
@@ -23,7 +25,7 @@ else
     else
     {
         <ul>
-            @foreach (var comment in post.Comments)
+            @foreach (var comment in comments)
             {
                 <li>@comment.Body (User: @GetUsername(comment.UserId))</li>
             }
@@ -31,16 +33,39 @@ else
     }
 }
 
+<h1>Create New Comment</h1>
+
+<div class="row mt-3">
+    <div class="col-sm-3">
+        <input @bind="Body" type="text" placeholder="Body" required>
+    </div>
+</div>
+
+<div class="row mt-3">
+    <div class="col-sm-3">
+        <input @bind="UserIds" type="text" placeholder="UserId" required>
+    </div>
+</div>
+
+<div class="row mt-3">
+    <div class="col-sm-3">
+        <button @onclick="CreateComment" class="btn btn-primary">Create Comment</button>
+    </div>
+</div>
+
 @code {
     [Parameter]
     public int PostId { get; set; }
 
     private GetSinglePostDto? post;
+    private List<CommentDto>? comments;
     private Dictionary<int, string> userLookup = new();
     
     protected override async Task OnInitializedAsync()
     {
         post = await PostService.GetSinglePost(PostId);
+        
+        await LoadComments();
         
         var users = await UserService.GetManyUsers();
         userLookup = users.ToDictionary(u => u.Id, u => u.Username);
@@ -49,5 +74,29 @@ else
     private string GetUsername(int userId)
     {
         return userLookup.TryGetValue(userId, out var username) ? username : "Unknown";
+    }
+    
+    public async Task LoadComments()
+    {
+        comments = await CommentService.GetManyComments(postId: PostId);
+    }
+
+    private string Body { get; set; }
+    private string UserIds { get; set; } //Ændres senere til, at være den som er logget ind
+    public int UserIdi;
+    
+    public async Task CreateComment()
+    {
+        int.TryParse(UserIds, out this.UserIdi);
+
+        CreateCommentDto ccd = new CreateCommentDto() { Body = this.Body, UserId = this.UserIdi, PostId = this.PostId };
+        await CommentService.AddComment(ccd);
+        
+        await LoadComments();
+        Body = "";
+        UserIds = "";
+        UserIdi = 0;
+
+        StateHasChanged();
     }
 }

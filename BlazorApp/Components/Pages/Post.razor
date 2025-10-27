@@ -14,18 +14,71 @@
 }
 else
 {
-    <ul>
+    <ul class="list-group">
         @foreach (var post in posts)
         {
-            <li>@post.Title</li>
+            <li class="list-group-item">
+                <a class="text-decoration-none" href=@($"/posts/{post.Id}")>
+                    @post.Title
+                </a>
+            </li>
         }
     </ul>
 }
+
+<h1>Create New Post</h1>
+<div class="row mt-3">
+    <div class="col-sm-3">
+        <input @bind="Title" type="text" placeholder="Title" required>
+    </div>
+</div>
+
+<div class="row mt-3">
+    <div class="col-sm-3">
+        <input @bind="Body" type="text" placeholder="Body" required>
+    </div>
+</div>
+
+<div class="row mt-3">
+    <div class="col-sm-3">
+        <input @bind="UserIds" type="text" placeholder="UserId" required>
+    </div>
+</div>
+
+<div class="row mt-3">
+    <div class="col-sm-3">
+        <button @onclick="CreatePost" class="btn btn-primary">Create Post</button>
+    </div>
+</div>
 
 @code {
     private List<PostDto>? posts;
 
     protected override async Task OnInitializedAsync()
+    {
+        posts = await PostService.GetManyPosts();
+    }
+    
+    public string Title { get; set; }
+    public string Body { get; set; }
+    public string UserIds { get; set; } //Ændres senere til at være den, som er logget ind
+    public int UserIdi;
+    public async void CreatePost()
+    {
+        int.TryParse(UserIds, out this.UserIdi);
+        
+        CreatePostDto cpd = new CreatePostDto() { Title = this.Title, Body = this.Body, UserId = UserIdi};
+        await PostService.AddPost(cpd);
+        await LoadPosts();
+        Title = "";
+        Body = "";
+        UserIds = "";
+        UserIdi = 0;
+
+        StateHasChanged();
+    }
+
+    public async Task LoadPosts()
     {
         posts = await PostService.GetManyPosts();
     }
