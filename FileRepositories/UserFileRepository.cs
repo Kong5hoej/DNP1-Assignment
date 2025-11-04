@@ -115,6 +115,9 @@ public class UserFileRepository : IUserRepository
                 break;
             }
         }
+
+        if (returnUser is null)
+            throw new UnauthorizedAccessException("You don't have permission to log in");
         
         usersAsJson = JsonSerializer.Serialize(users);
         await File.WriteAllTextAsync(filePath, usersAsJson);

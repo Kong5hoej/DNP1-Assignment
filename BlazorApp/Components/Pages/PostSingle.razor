@@ -1,4 +1,5 @@
 ﻿@page "/posts/{PostId:int}"
+@using System.Security.Claims
 @using ApiContracts.Comments
 @using ApiContracts.Posts
 @using ApiContracts.Users
@@ -33,29 +34,27 @@ else
     }
 }
 
-<h1>Create New Comment</h1>
+@if (!string.IsNullOrEmpty(UserIds))
+{
+    <h1>Create New Comment</h1>
 
-<div class="row mt-3">
-    <div class="col-sm-3">
-        <input @bind="Body" type="text" placeholder="Body" required>
+    <div class="row mt-3">
+        <div class="col-sm-3">
+            <input @bind="Body" type="text" placeholder="Body" required>
+        </div>
     </div>
-</div>
 
-<div class="row mt-3">
-    <div class="col-sm-3">
-        <input @bind="UserIds" type="text" placeholder="UserId" required>
+    <div class="row mt-3">
+        <div class="col-sm-3">
+            <button @onclick="CreateComment" class="btn btn-primary">Create Comment</button>
+        </div>
     </div>
-</div>
-
-<div class="row mt-3">
-    <div class="col-sm-3">
-        <button @onclick="CreateComment" class="btn btn-primary">Create Comment</button>
-    </div>
-</div>
+}
 
 @code {
     [Parameter]
     public int PostId { get; set; }
+    [CascadingParameter] public Task<AuthenticationState> State { get; set; }
 
     private GetSinglePostDto? post;
     private List<CommentDto>? comments;
@@ -69,6 +68,16 @@ else
         
         var users = await UserService.GetManyUsers();
         userLookup = users.ToDictionary(u => u.Id, u => u.Username);
+        
+        AuthenticationState authenticationState = await State;
+        ClaimsPrincipal claimsPrincipal = authenticationState.User;
+        if(claimsPrincipal.Identity is null || !claimsPrincipal.Identity.IsAuthenticated)
+        {
+            return;
+        }
+        string? username = claimsPrincipal.Identity?.Name;
+        IEnumerable<Claim> claims = claimsPrincipal.Claims;
+        UserIds = claims.Single(c => c.Type == "Id").Value;
     }
     
     private string GetUsername(int userId)
@@ -82,7 +91,7 @@ else
     }
 
     private string Body { get; set; }
-    private string UserIds { get; set; } //Ændres senere til, at være den som er logget ind
+    private string UserIds { get; set; }
     public int UserIdi;
     
     public async Task CreateComment()

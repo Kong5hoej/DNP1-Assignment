@@ -1,4 +1,5 @@
 ﻿@page "/posts"
+@using System.Security.Claims
 @using ApiContracts.Posts
 @using BlazorApp.Services
 @inject IPostService PostService
@@ -25,7 +26,8 @@ else
         }
     </ul>
 }
-
+@if (!string.IsNullOrEmpty(UserIds))
+{
 <h1>Create New Post</h1>
 <div class="row mt-3">
     <div class="col-sm-3">
@@ -39,30 +41,37 @@ else
     </div>
 </div>
 
-<div class="row mt-3">
-    <div class="col-sm-3">
-        <input @bind="UserIds" type="text" placeholder="UserId" required>
+    <div class="row mt-3">
+        <div class="col-sm-3">
+            <button @onclick="CreatePost" class="btn btn-primary">Create Post</button>
+        </div>
     </div>
-</div>
-
-<div class="row mt-3">
-    <div class="col-sm-3">
-        <button @onclick="CreatePost" class="btn btn-primary">Create Post</button>
-    </div>
-</div>
+}
 
 @code {
     private List<PostDto>? posts;
+    [CascadingParameter] public Task<AuthenticationState> State { get; set; }
+    
+    public string Title { get; set; }
+    public string Body { get; set; }
+    public string UserIds { get; set; }
+    public int UserIdi;
 
     protected override async Task OnInitializedAsync()
     {
         posts = await PostService.GetManyPosts();
+        
+        AuthenticationState authenticationState = await State;
+        ClaimsPrincipal claimsPrincipal = authenticationState.User;
+        if(claimsPrincipal.Identity is null || !claimsPrincipal.Identity.IsAuthenticated)
+        {
+            return;
+        }
+        string? username = claimsPrincipal.Identity?.Name;
+        IEnumerable<Claim> claims = claimsPrincipal.Claims;
+        UserIds = claims.Single(c => c.Type == "Id").Value;
     }
     
-    public string Title { get; set; }
-    public string Body { get; set; }
-    public string UserIds { get; set; } //Ændres senere til at være den, som er logget ind
-    public int UserIdi;
     public async void CreatePost()
     {
         int.TryParse(UserIds, out this.UserIdi);

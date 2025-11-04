@@ -82,9 +82,6 @@ public class PostFileRepository : IPostRepository
             throw new InvalidOperationException(
                 $"Post with ID '{id}' not found");
         }
-        
-        postsAsJson = JsonSerializer.Serialize(posts);
-        await File.WriteAllTextAsync(filePath, postsAsJson);
         return post;
     }
 
