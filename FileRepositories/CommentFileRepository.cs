@@ -88,11 +88,6 @@ public class CommentFileRepository : ICommentRepository
         string commentsAsJson = await File.ReadAllTextAsync(filePath);
         List<Comment> comments = JsonSerializer.Deserialize<List<Comment>>(commentsAsJson)!;
         
-        List<Comment> comments2 = new List<Comment>();
-        comments2 = comments.Where(c => c.PostId == postId).ToList();
-        
-        commentsAsJson = JsonSerializer.Serialize(comments);
-        await File.WriteAllTextAsync(filePath, commentsAsJson);
-        return comments2;
+        return comments.Where(c => c.PostId == postId).ToList();
     }
 }
